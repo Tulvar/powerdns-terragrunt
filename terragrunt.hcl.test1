@@ -1,0 +1,42 @@
+locals {
+  state_path = basename(path_relative_to_include())
+  siska_vars = yamldecode(file("${get_parent_terragrunt_dir()}/zones/siska/siska.yml"))
+  zopa_vars = yamldecode(file("${get_parent_terragrunt_dir()}/zones/zopa/zopa.yml"))
+}
+
+inputs = {
+    pdns_api_key    = get_env("SECRET_API_KEY", "")
+    dns_records_map = merge(local.siska_vars.dns_records_map, local.zopa_vars.dns_records_map)
+}
+
+remote_state {
+  generate = {
+    path      = "_backend.tf"
+    if_exists = "overwrite"
+  }
+  backend = "http"
+  config = {
+    address        = format("%s/projects/%s/terraform/state/%s", get_env("CI_API_V4_URL", ""), get_env("CI_PROJECT_ID", ""), local.state_path)
+    lock_address   = format("%s/projects/%s/terraform/state/%s/lock", get_env("CI_API_V4_URL", ""), get_env("CI_PROJECT_ID", ""), local.state_path)
+    unlock_address = format("%s/projects/%s/terraform/state/%s/lock", get_env("CI_API_V4_URL", ""), get_env("CI_PROJECT_ID", ""), local.state_path)
+    retry_max      = "3"
+    unlock_method  = "DELETE"
+    lock_method    = "POST"
+    retry_wait_min = "5"
+  }
+}
+
+generate "provider" {
+  path      = "_provider.tf"
+  if_exists = "overwrite_terragrunt"
+  contents  = <<EOL
+terraform {
+  required_providers {
+    powerdns = {
+      source  = "terraform.local/local/powerdns"
+      version = "1.5.0"
+    }
+  }
+}
+EOL
+}

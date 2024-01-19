@@ -1,0 +1,17 @@
+dns_records_map:
+  "domen.ru.":
+    A:
+      - name: "l.domen.ru."
+        values: ["192.168.1.5"]
+      - name: "bechbermak.domen.ru."
+        values: ["66.66.66.66"]
+        ttl: 300
+    MX:
+      - name: "domen.ru."
+        values: ["10 mail.domen.ru."]
+        ttl: 300
+    CNAME:
+      - name: "alias.domen.ru."
+        values: ["target.domen.ru."]
+        ttl: 300
+        

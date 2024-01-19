@@ -1,0 +1,10 @@
+dns_records_map:
+  "example.com.":
+    A:
+      - name: "app.example.com."
+        values: ["192.168.2.1","192.168.2.228"]
+        ttl: 300
+    LUA:
+      - name: "allo.example.com."
+        values: ["A \"view({ '192.168.0.0/16', '192.168.1.54'}, {'0.0.0.0/0', '192.0.2.1' })\""]
+        ttl: 228
